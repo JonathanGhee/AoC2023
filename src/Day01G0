@@ -1,0 +1,96 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"unicode"
+)
+
+var numbers = map[string]string{
+	"one":   "1",
+	"two":   "2",
+	"three": "3",
+	"four":  "4",
+	"five":  "5",
+	"six":   "6",
+	"seven": "7",
+	"eight": "8",
+	"nine":  "9",
+}
+
+// 57345
+func main() {
+	fmt.Println(aoc1("input.txt"))
+}
+
+func aoc1(filepath string) int {
+	var sum = 0
+	fileLines := getInputText(filepath)
+
+	for _, line := range fileLines {
+		i, err := strconv.Atoi(findNumber(line, true) + findNumber(line, false))
+		check(err)
+		sum += i
+	}
+	return sum
+}
+
+func getInputText(filepath string) []string {
+	readFile, err := os.Open(filepath)
+	check(err)
+
+	fileScanner := bufio.NewScanner(readFile)
+	fileScanner.Split(bufio.ScanLines)
+	var fileLines []string
+
+	for fileScanner.Scan() {
+		fileLines = append(fileLines, fileScanner.Text())
+	}
+
+	readFile.Close()
+	return fileLines
+}
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+func findNumber(line string, first bool) string {
+	var num, letters string
+	var p int
+	if first {
+		p = 0
+	} else {
+		p = len(line) - 1
+	}
+
+	for range line {
+		if len(num) > 0 {
+			break
+		}
+		if unicode.IsDigit(rune(line[p])) {
+			num = string(line[p])
+			break
+		} else {
+			if first {
+				letters += string(line[p])
+				p++
+			} else {
+				letters = string(line[p]) + letters
+				p--
+			}
+			for key, val := range numbers {
+				if strings.Contains(letters, key) {
+					num = val
+					break
+				}
+			}
+		}
+	}
+	return num
+}
